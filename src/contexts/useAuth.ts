@@ -16,7 +16,6 @@ export const useAuth = () => {
   useEffect(() => {
     const auth = getAuth(app);
     return onAuthStateChanged(auth, (user) => {
-      console.log('hook user: ', user);
       setUser(user);
       setIsLoading(false);
     });
