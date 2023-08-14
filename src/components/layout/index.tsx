@@ -37,7 +37,7 @@ const Layout = ({ children }: Props) => {
               {user ? (
                 <>{children}</>
               ) : (
-                <Box sx={{ textAlign: 'center'}}>
+                <Box sx={{ textAlign: 'center' }}>
                   <Typography sx={{ fontWeight: 'bold' }}>
                     利用するにはtohoku.ac.jpのメールアドレスでログインしてください
                   </Typography>

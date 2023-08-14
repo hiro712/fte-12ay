@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 const BOUD_RATE = 9600;
 
@@ -9,11 +9,13 @@ export const usePort = () => {
   const [isReading, setIsReading] = useState<boolean>(false);
   const [breakFlag, setBreakFlag] = useState<boolean>(false);
 
-  useEffect(() => console.log("port", port), [port]);
+  useEffect(() => console.log('port', port), [port]);
 
   const requestPort = async () => {
     if ('serial' in navigator === false) {
-      toast.error('デバイスやブラウザがシリアルポートAPIをサポートしていません');
+      toast.error(
+        'デバイスやブラウザがシリアルポートAPIをサポートしていません',
+      );
       return;
     }
     // @ts-ignore
@@ -29,7 +31,7 @@ export const usePort = () => {
 
     await port.open({ baudRate: BOUD_RATE }).catch((e: any) => {
       toast.error(`ポートを開く際にエラーが発生しました: ${e}`);
-      return
+      return;
     });
 
     const reader = port.readable.getReader();
@@ -43,21 +45,20 @@ export const usePort = () => {
           setBreakFlag(false);
           break;
         }
-        console.log("line: ", value);
+        console.log('line: ', value);
         setLines((preLines) => [...preLines, value]);
       }
     } catch (e) {
       toast.error(`読み込み中にエラーが発生しました: ${e}`);
     }
     setIsReading(false);
-    return
-  }
+    return;
+  };
 
   const stopRead = () => {
     setBreakFlag(true);
     setPort(null);
-  }
-
+  };
 
   return { requestPort, readLine, stopRead, isReading, lines, port };
-}
+};
