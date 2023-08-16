@@ -1,4 +1,5 @@
 export type FlightData = {
+  time: string;
   mode: number;
   pin: number;
   height: number;

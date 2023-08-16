@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import Header from './header';
 import {
   Box,
+  Button,
   CircularProgress,
   Container,
   Stack,
@@ -15,7 +16,7 @@ type Props = {
 };
 
 const Layout = ({ children }: Props) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, login } = useAuth();
   return (
     <>
       <Header />
@@ -38,9 +39,12 @@ const Layout = ({ children }: Props) => {
                 <>{children}</>
               ) : (
                 <Box sx={{ textAlign: 'center' }}>
-                  <Typography sx={{ fontWeight: 'bold' }}>
+                  <Typography sx={{ fontWeight: 'bold', mb: 4 }}>
                     利用するにはtohoku.ac.jpのメールアドレスでログインしてください
                   </Typography>
+                  <Button variant="contained" onClick={login}>
+                    ログイン
+                  </Button>
                 </Box>
               )}
             </>

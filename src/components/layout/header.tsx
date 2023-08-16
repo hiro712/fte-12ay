@@ -12,10 +12,8 @@ import {
   Typography,
 } from '@mui/material';
 import LoginIcon from '@mui/icons-material/Login';
-import HomeIcon from '@mui/icons-material/Home';
 import { useRouter } from 'next/router';
 import LogoutIcon from '@mui/icons-material/Logout';
-import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/useAuth';
 
@@ -60,18 +58,6 @@ const Header = () => {
                   'aria-labelledby': 'basic-button',
                 }}
               >
-                <MenuItem onClick={() => router.push('/')}>
-                  <ListItemIcon>
-                    <HomeIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText>Topページ</ListItemText>
-                </MenuItem>
-                <MenuItem onClick={() => router.push('/key')}>
-                  <ListItemIcon>
-                    <SettingsSuggestIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText>APIキー設定</ListItemText>
-                </MenuItem>
                 <MenuItem onClick={logout}>
                   <ListItemIcon>
                     <LogoutIcon fontSize="small" />

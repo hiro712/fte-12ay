@@ -1,7 +1,8 @@
+import { testSerialData } from '@/services/data';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-const BOUD_RATE = 9600;
+// const BOUD_RATE = 9600;
 
 export const usePort = () => {
   const [lines, setLines] = useState<string[]>([]);
@@ -18,9 +19,14 @@ export const usePort = () => {
       );
       return;
     }
-    // @ts-ignore
-    const port_ = await navigator.serial.requestPort();
-    setPort(port_);
+    try {
+      // @ts-ignore
+      const port_ = await navigator.serial.requestPort();
+      setPort(port_);
+    } catch (e) {
+      toast.error('キャンセルされました');
+      return;
+    }
   };
 
   const readLine = async () => {
@@ -29,24 +35,25 @@ export const usePort = () => {
       return;
     }
 
-    await port.open({ baudRate: BOUD_RATE }).catch((e: any) => {
-      toast.error(`ポートを開く際にエラーが発生しました: ${e}`);
-      return;
-    });
+    // await port.open({ baudRate: BOUD_RATE }).catch((e: any) => {
+    //   toast.error(`ポートを開く際にエラーが発生しました: ${e}`);
+    //   return;
+    // });
 
-    const reader = port.readable.getReader();
     try {
+      // const reader = port.readable.getReader();
       setIsReading(true);
       setLines([]);
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        const { value, done } = await reader.read();
+        // const { value, done } = await reader.read();
+        const { value, done } = await testSerialData();
         if (done || breakFlag) {
           setBreakFlag(false);
           break;
         }
-        console.log('line: ', value);
-        setLines((preLines) => [...preLines, value]);
+        const valueAddTime = value + 'f' + new Date().toISOString();
+        setLines((preLines) => [...preLines, valueAddTime]);
       }
     } catch (e) {
       toast.error(`読み込み中にエラーが発生しました: ${e}`);

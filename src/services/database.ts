@@ -1,5 +1,10 @@
 import { getDatabase, push, ref, update } from 'firebase/database';
 
+export function getRefDB(path: string) {
+  const db = getDatabase();
+  return ref(db, path);
+}
+
 export async function pushByRefDB(path: string, content: unknown) {
   const db = getDatabase();
   const updates: any = {};

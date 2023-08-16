@@ -1,5 +1,7 @@
-import { pushByRefDB } from '@/services/database';
+import { getRefDB, pushByRefDB } from '@/services/database';
 import { FlightData, ProjectData } from '@/types/data';
+import dayjs from 'dayjs';
+import { onValue } from 'firebase/database';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -7,12 +9,20 @@ export const useDataAdmin = () => {
   const [key, setKey] = useState<string | null>(null);
   const [isApploading, setIsAppLoading] = useState<boolean>(false);
   const [contents, setContents] = useState<FlightData[]>([]);
+  const [currentContent, setCurrentContent] = useState<FlightData | null>({
+    mode: 1,
+    pin: 1,
+    height: 340,
+    latitude: 40.1231,
+    longitude: 140.1231,
+    time: dayjs().format('HH時mm分ss秒'),
+  });
+  const [isReading, setIsReading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!isApploading) return;
-    if (!key) return;
-    // データアップロード処理
-  }, [isApploading, key]);
+    if (contents.length === 0) return;
+    setCurrentContent(contents[contents.length - 1]);
+  }, [contents]);
 
   const initData = async () => {
     const name = prompt('プロジェクト名を入力してください');
@@ -28,12 +38,11 @@ export const useDataAdmin = () => {
     const promise = new Promise((resolve, reject) => {
       pushByRefDB('data', data)
         .then((key_) => {
-          console.log(key_);
           setKey(key_);
           resolve(key_);
         })
         .catch((error) => {
-          console.log(error);
+          console.log('エラー', error);
           reject(error);
         });
     });
@@ -56,8 +65,22 @@ export const useDataAdmin = () => {
   };
 
   const readData = async () => {
-    // データ読み込み処理
+    setIsReading(true);
     setContents([]);
+    try {
+      onValue(getRefDB('data/' + key), (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+          toast.error('データが存在しません');
+          return;
+        }
+        setContents(JSON.parse(data.content));
+      });
+    } catch (e) {
+      console.log('エラー', e);
+      toast.error('読み込みに失敗しました');
+      setIsReading(false);
+    }
   };
 
   return {
@@ -67,6 +90,8 @@ export const useDataAdmin = () => {
     startAppload,
     endAppload,
     readData,
+    isReading,
     contents,
+    currentContent,
   };
 };
