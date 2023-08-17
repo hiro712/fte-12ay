@@ -1,181 +1,142 @@
-import { useDataAdmin } from '@/contexts/useDataAdmin';
-import { usePort } from '@/contexts/usePort';
-import { lines2FlightData, modeCode2Text } from '@/services/data';
-import { updateByRefDB } from '@/services/database';
+import { useDataRead } from '@/contexts/useDataRead';
 import {
+  Badge,
   Box,
   Button,
-  ButtonGroup,
   Card,
   CardContent,
+  CardMedia,
   Grid,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
+  LinearProgress,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
   Typography,
 } from '@mui/material';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Monitor from '../monitor';
+import { useProject } from '@/contexts/useProject';
+import { ProjectList } from '@/types/data';
 
 export default function Top() {
-  const { requestPort, readLine, stopRead, isReading, lines, port } = usePort();
-  const {
-    key,
-    isApploading,
-    initData,
-    startAppload,
-    endAppload,
-    readData,
-    isReading: isDataReading,
-    currentContent,
-  } = useDataAdmin();
+  const { projectLists } = useProject();
+  const [currentProject, setCurrentProject] = useState<ProjectList | null>(
+    null,
+  );
 
   useEffect(() => {
-    if (lines.length === 0) return;
-    if (key === null || '') return;
-    if (!isApploading) return;
-    const data = lines2FlightData(lines);
-    console.log('data', data);
-    updateByRefDB('data/' + key + '/content', JSON.stringify(data));
-  }, [lines, key, isApploading]);
+    console.log(projectLists);
+  }, [projectLists]);
+  const {
+    setKey,
+    readData,
+    archiveData,
+    isReading,
+    isArchiving,
+    progress,
+    currentContent,
+    setCurrentContent,
+  } = useDataRead();
+
+  const startReadData = async () => {
+    if (currentProject) {
+      setKey(currentProject.key);
+      readData();
+    }
+  };
 
   return (
     <Stack spacing={2}>
-      <Box>
-        <ButtonGroup variant="contained" aria-label="port button group">
-          <Button onClick={requestPort}>開く</Button>
-          {port ? (
-            <Button onClick={readLine}>開始</Button>
-          ) : (
-            <Button disabled>開始</Button>
-          )}
-          {port && isReading ? (
-            <Button onClick={stopRead}>停止</Button>
-          ) : (
-            <Button disabled>停止</Button>
-          )}
-        </ButtonGroup>
-      </Box>
-      <TextField
-        label="シリアルモニタ"
-        multiline
-        aria-readonly
-        rows={10}
-        value={lines.join('\n')}
-      />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        {key ? (
-          <Typography sx={{ fontWeight: 'bold' }}>ID: {key}</Typography>
-        ) : (
-          <Button variant="contained" onClick={initData}>
-            プロジェクトを作成
-          </Button>
-        )}
-        {isApploading ? (
-          <Button variant="outlined" onClick={endAppload}>
-            アップロード中...
-          </Button>
-        ) : (
-          <Button variant="contained" onClick={startAppload}>
-            アップロード
-          </Button>
-        )}
-      </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        {isDataReading ? (
-          <Button variant="outlined" disabled>
-            読み込み中...
-          </Button>
-        ) : (
-          <Button variant="contained" onClick={readData}>
-            データを読み込む
-          </Button>
-        )}
-      </Box>
-      {currentContent && (
+      {currentProject ? (
         <>
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell align="right">Time</TableCell>
-                  <TableCell align="right">Mode</TableCell>
-                  <TableCell align="right">FlightPin</TableCell>
-                  <TableCell align="right">Height(m)</TableCell>
-                  <TableCell align="right">Latitude</TableCell>
-                  <TableCell align="right">Longitude</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell align="right">{currentContent.time}</TableCell>
-                  <TableCell component="th" scope="row" align="right">
-                    {currentContent.mode}
-                  </TableCell>
-                  <TableCell align="right">{currentContent.pin}</TableCell>
-                  <TableCell align="right">{currentContent.height}</TableCell>
-                  <TableCell align="right">{currentContent.latitude}</TableCell>
-                  <TableCell align="right">
-                    {currentContent.longitude}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <Grid container>
-            <Grid item xs={6} md={3}>
-              <Card>
-                <CardContent>
-                  <List>
-                    <ListItem>
-                      <ListItemText primary={`時刻: ${currentContent.time}`} />
-                    </ListItem>
-                  </List>
-                  <List>
-                    <ListItem>
-                      <ListItemText
-                        primary={`モード: ${modeCode2Text(
-                          currentContent.mode,
-                        )}`}
-                      />
-                    </ListItem>
-                  </List>
-                  <List>
-                    <ListItem>
-                      <ListItemText
-                        primary={`高度: ${currentContent.height}m`}
-                      />
-                    </ListItem>
-                  </List>
-                  <List>
-                    <ListItem>
-                      <ListItemText
-                        primary={`緯度: ${currentContent.latitude}`}
-                      />
-                    </ListItem>
-                  </List>
-                  <List>
-                    <ListItem>
-                      <ListItemText
-                        primary={`経度: ${currentContent.longitude}`}
-                      />
-                    </ListItem>
-                  </List>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            {isReading ? (
+              <>
+                <Box sx={{ display: 'flex', justifyContent: 'left' }}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      setCurrentProject(null);
+                      setCurrentContent(null);
+                    }}
+                  >
+                    違うデータを選択
+                  </Button>
+                  <Typography sx={{ ml: 2, my: 'auto' }}>
+                    現在:{currentProject.project.name}
+                  </Typography>
+                </Box>
+                {isArchiving ? (
+                  <Button variant="contained" disabled>
+                    アーカイブ再生中...
+                  </Button>
+                ) : (
+                  <Button
+                    variant="contained"
+                    onClick={() => archiveData(currentProject.project.contents)}
+                  >
+                    アーカイブ再生
+                  </Button>
+                )}
+              </>
+            ) : (
+              <Button variant="contained" onClick={startReadData}>
+                データを読み込む
+              </Button>
+            )}
+          </Box>
+          {currentContent && (
+            <>
+              <LinearProgress variant="determinate" value={progress} />
+              <Monitor content={currentContent} />
+            </>
+          )}
         </>
+      ) : (
+        <Grid container spacing={2}>
+          {projectLists.length != 0 &&
+            projectLists.map((project, index) => {
+              return (
+                <Grid item xs={12} sm={6} md={4} key={project.key}>
+                  <Card>
+                    <CardMedia
+                      image={'/rocket' + (index % 3) + '.jpg'}
+                      title="rocket"
+                    />
+                    <CardContent>
+                      <Stack spacing={2}>
+                        {project.project.isApploading ? (
+                          <Badge
+                            color="success"
+                            badgeContent="オンライン"
+                            overlap="circular"
+                          >
+                            <Typography variant="h5">
+                              {project.project.name}
+                            </Typography>
+                          </Badge>
+                        ) : (
+                          <Typography variant="h5">
+                            {project.project.name}
+                          </Typography>
+                        )}
+                        <Typography variant="body2">
+                          {'データ長: ' +
+                            (project.project.contents != ''
+                              ? JSON.parse(project.project.contents).length
+                              : 0)}
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          onClick={() => setCurrentProject(project)}
+                        >
+                          選択
+                        </Button>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            })}
+        </Grid>
       )}
     </Stack>
   );

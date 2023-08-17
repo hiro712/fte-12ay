@@ -2,7 +2,7 @@ import { testSerialData } from '@/services/data';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-// const BOUD_RATE = 9600;
+// const BOUD_RATE = 115200;
 
 export const usePort = () => {
   const [lines, setLines] = useState<string[]>([]);
@@ -41,7 +41,7 @@ export const usePort = () => {
     // });
 
     try {
-      // const reader = port.readable.getReader();
+      // const reader = port.readable.pipeThrough(new TextDecoderStream()).getReader();
       setIsReading(true);
       setLines([]);
       // eslint-disable-next-line no-constant-condition
@@ -52,7 +52,7 @@ export const usePort = () => {
           setBreakFlag(false);
           break;
         }
-        const valueAddTime = value + 'f' + new Date().toISOString();
+        const valueAddTime = value + 'time' + new Date().toISOString();
         setLines((preLines) => [...preLines, valueAddTime]);
       }
     } catch (e) {
